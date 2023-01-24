@@ -1,5 +1,0 @@
-{
-    "platform": "docker",
-    "app": "python-indicator",
-    "port": 5000
-}
