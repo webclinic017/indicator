@@ -53,13 +53,13 @@ def IndicatorNeedlePointer(symbol1='ETHUSDT', symbol2='BTCUSDT'):
                 edited_l_interval = round(U_interval-(8*scaler*10))
                 edited_U_interval = round(U_interval)
         
-        str_6h = str(state_6h)
+        str_6h = list(str(state_6h))
         pointindex_6h = str_6h.index('.')
         if int(str_6h[pointindex_6h+1])%2==0:
-                edited_state_6h = float(str_6h[0:pointindex_6h+2])
+                edited_state_6h = float(''.join(str_6h[0:pointindex_6h+2]))
         else:
-                str_6h[pointindex_6h+1] = int(str_6h[pointindex_6h+1])+1
-                edited_state_6h = float(str_6h[0:pointindex_6h+2])
+                str_6h[pointindex_6h+1] = str(int(str_6h[pointindex_6h+1])+1)
+                edited_state_6h = float(''.join(str_6h[0:pointindex_6h+2]))
         
         str_1D = list(str(state_1D))
         pointindex_1D = str_1D.index('.')
@@ -85,3 +85,6 @@ def IndicatorNeedlePointer(symbol1='ETHUSDT', symbol2='BTCUSDT'):
             'scaler':scaler
             }
         return result
+
+
+print(IndicatorNeedlePointer(symbol1='ETHUSDT', symbol2='BTCUSDT'),AltcoinBTC(symbol1='ETHUSDT', symbol2='BTCUSDT'))
