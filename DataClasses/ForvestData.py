@@ -8,7 +8,7 @@ import datetime
 
 
 
-class ForvestData():
+class SymbolData():
      """
      TVdata class: A class that read data from an api forvest address, then changes it to a pandas dataframe. 
 
@@ -22,18 +22,18 @@ class ForvestData():
                     start_date: start_date of candlestick data and must be datetime.datetime format.
                     end_date: end_date of candlestick data and must be datetime.datetime format.
                     dayslength: dayslength of candlestick data and is an int number.
-
+                    symboldata: containing a DataFrame of requested symbol, which indexed with timestamp
+                    close: a pandas Series with timestamp index, contained close price.
+                    open: a pandas Series with timestamp index, contained open price
+                    low: a pandas Series with timestamp index, contained low price
+                    high:a pandas Series with timestamp index, contained high price
+                    volume:a pandas Series with timestamp index, contained volume price
 
           Methods:
                     Create __init__: 
                          Inputs: dataFrame
-                         Functionality: prepare self attributes
+                         Functionality: prepare self attributes and reade and prepare date from Forvest database.
                          Output: None
-
-                    SymbolData(self):
-                         Inputs: None
-                         Functionality: reade and prepare date from Forvest database.
-                         Output: symbol data as a pandas DataFrome.
                     
      """
 
@@ -47,16 +47,13 @@ class ForvestData():
           self.start_date = start_date
           self.end_date = end_date
           self.dayslength = dayslength
-        
+          self.symboldata = None
+          self.close = None
+          self.open = None
+          self.low = None
+          self.high = None
+          self.volume = None
 
-
-     def SymbolData(self):
-
-          lengthdays = self.dayslength
-          candletype = self.candletype
-          timeframe = self.timeframe
-          symbol = self.symbol
-          exchange = self.exchange
           
           if self.end_date is None:
                end_date = datetime.datetime.now()
@@ -64,24 +61,31 @@ class ForvestData():
                end_date = self.end_date
           
           if self.start_date is None:
-               start_date = end_date - datetime.timedelta(days=lengthdays)
+               start_date = end_date - datetime.timedelta(days=self.dayslength)
           else:
                start_date = self.start_date
 
-          if candletype!='futures' or candletype!='spot':
+          if self.candletype not in ['futures', 'spot']:
                raise Exception("Candletype is incorrect. it must be 'futures' or 'spot' ")
-          if timeframe not in ['1h', '4h', '1d', '1w','1M']:
+          if self.timeframe not in ['1h', '4h', '1d', '1w','1M']:
                raise Exception("Timeframe is incorrect. it must be '1h', '4h', '1d', '1w' or '1M'.") 
-          if not isinstance(symbol, str):
+          if not isinstance(self.symbol, str):
                raise Exception("Symbol is incorrect. it must be str.") 
-          if not isinstance(exchange, str):
+          if not isinstance(self.exchange, str):
                raise Exception("Exchange is incorrect. it must be str.") 
 
           end_timestamp = int(end_date.timestamp())*1000
           start_timestamp = int(start_date.timestamp())*1000
 
-          symbol_address = f'https://candles-forvest.iran.liara.run/api/v1/candles?exchange={exchange}&symbol={symbol}&type={candletype}&tf={timeframe}&startTime={start_timestamp}&endTime={end_timestamp}'
+          symbol_address = f'https://candles-forvest.iran.liara.run/api/v1/candles?exchange={self.exchange}&symbol={self.symbol}&type={self.candletype}&tf={self.timeframe}&startTime={start_timestamp}&endTime={end_timestamp}'
           symbol_request = requests.get(symbol_address,timeout=(120,120)).json()
-          symbol_data = pd.DataFrame(dict(symbol_request)['data'])
-          return symbol_data
+          self.symboldata = pd.DataFrame(dict(symbol_request)['data'])
+          timestamp = self.symboldata['openTime'].apply(lambda x: datetime.datetime.fromtimestamp(x/1000))
+          self.symboldata.index = timestamp
+          self.high = pd.to_numeric(self.symboldata['high'])
+          self.open = pd.to_numeric(self.symboldata['open'])
+          self.close = pd.to_numeric(self.symboldata['close'])
+          self.low = pd.to_numeric(self.symboldata['low'])
+          self.volume = pd.to_numeric(self.symboldata['volume'])
+
 
