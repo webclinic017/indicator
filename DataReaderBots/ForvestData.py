@@ -10,7 +10,7 @@ import datetime
 
 class SymbolData():
      """
-     TVdata class: A class that read data from an api forvest address, then changes it to a pandas dataframe. 
+     SymbolData class: A class that read data from an api forvest address, then changes it to a pandas dataframe. 
 
           Attributes:
                     exchange: exchange of candlestick data, must be str like 'binance'
